@@ -1,0 +1,6 @@
+/static StaticR Static getStatic
+
+/favicon.ico FaviconR GET
+
+/ HomeR GET
+/log RedirectR GET

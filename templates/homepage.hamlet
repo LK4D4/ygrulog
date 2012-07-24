@@ -1,0 +1,4 @@
+<form .well method=get action=@{RedirectR}>
+  <input type="date" *{attrs}>
+  ^{formWidget}
+  <button .btn type="submit">Читать!
