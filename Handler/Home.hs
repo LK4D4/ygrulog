@@ -2,29 +2,47 @@
 module Handler.Home where
 
 import Import
-import Data.Time (Day)
+import Data.Time.Calendar
+import Data.Time.Clock
+import Data.Text as T
+import Data.Maybe
+import Text.Printf
 
-instance YesodJquery App
-
--- This is a handler function for the GET request method on the HomeR
--- resource pattern. All of your resource patterns are defined in
--- config/routes
---
--- The majority of the code you will write in Yesod lives in these handler
--- functions. You can spread them across multiple files if you are so
--- inclined, or create a single monolithic file.
 getHomeR :: Handler RepHtml
 getHomeR = do
-    (formWidget, formEnctype) <- generateFormPost $ renderTable sampleForm
+    form <- liftIO logDateForm
+    (formWidget, formEnctype) <- generateFormPost $ renderTable form
     defaultLayout $ do
         aDomId <- lift newIdent
         setTitle "Welcome To Yesod!"
         let attrs = [("max", "2008-07-26")]
         $(widgetFile "homepage")
 
+gentooUrl :: Text
+gentooUrl = "http://gentoo.ru/jabber/logs/gentoo@conference.gentoo.ru/"
+
+redirectUrlTail :: (Integer, Int, Int) -> Text
+redirectUrlTail (year, month, day) = T.pack $ printf "%d/%02d/%02d.html" year month day
+
 getRedirectR :: Handler RepHtml
 getRedirectR = do
-    redirect ("http://yandex.ru"::Text)
+    date <- toGregorian <$> fromJust <$> (runInputGet $ iopt dayField "date")
+    let redirectUrl = T.append gentooUrl $ redirectUrlTail date
+    redirect (redirectUrl)
 
-sampleForm :: AForm App App Day
-sampleForm = areq (let attrs = [("max", "2008-07-26")] in dayField) "Дата" Nothing
+getCurrentDay :: IO Day
+getCurrentDay = do
+    getCurrentTime >>= return . utctDay
+
+datePickerAttrs :: Day -> [(Text, Text)]
+datePickerAttrs day = 
+    let textDay = T.pack $ showGregorian day
+        in [ ("min", "2008-07-26")
+           , ("max", textDay)]
+
+logDateForm :: IO (AForm App App Day)
+logDateForm = do
+    currentDay <- getCurrentDay
+    let attrs = datePickerAttrs currentDay
+    let fieldSettings = FieldSettings "Дата" Nothing Nothing (Just "date") attrs
+    return $ areq dayField fieldSettings (Just currentDay)

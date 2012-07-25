@@ -7,7 +7,6 @@ module Application
 
 import Import
 import Settings
-import Yesod.Auth
 import Yesod.Default.Config
 import Yesod.Default.Main
 import Yesod.Default.Handlers
@@ -15,7 +14,7 @@ import Yesod.Logger (Logger, logBS, toProduction)
 import Network.Wai.Middleware.RequestLogger (logCallback, logCallbackDev)
 import qualified Database.Persist.Store
 import Database.Persist.GenericSql (runMigration)
-import Network.HTTP.Conduit (newManager, def)
+import Network.HTTP.Conduit (newManager)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
